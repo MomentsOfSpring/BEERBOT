@@ -1,6 +1,14 @@
-from datetime import datetime, timedelta
 import time
+import schedule
+import threading
 import logging
+import pytz
+
+from datetime import datetime, timedelta
+from config import bot, BOSS, MAGIC_CHAT_ID, BARTENDER
+from polls import create_poll, unpin_poll
+from utils import generate_report, clear_poll_results, clear_poll_id
+from buttons import send_reservation_buttons
 
 
 logger = logging.getLogger(__name__)
@@ -13,28 +21,58 @@ logger = logging.getLogger(__name__)
 # СРЕДА // 19:00 - Пожелание хорошей игры
 #
 # ========================================================================
+MSK = pytz.timezone('Europe/Moscow')
+print(datetime.now(MSK))
 
 
-# Функция получения следующей среды для создания опроса:
-def get_next_wednesday():
-    today = datetime.now()
-    days_ahead = (2 - today.weekday()) % 7  # 2 = среда
-    if days_ahead == 0:
-        days_ahead = 7
-    return today + timedelta(days=days_ahead)
+def monday_ten_am():
+    now = datetime.now(MSK).strftime('%Y-%m-%d %H:%M:%S')
+    print(f"[{now}] Запуск опроса в понедельник 10:00 (МСК)")
+    create_poll(bot)
+    bot.send_message(BOSS, "Опрос запущен автоматически (понедельник, 10:00 МСК).")
 
 
-def schedule():
-    """Основной планировщик задач"""
-    logger.info("Запуск планировщика задач")
-    last_monday_run = None
-    last_wednesday_run = None
+def wednesday_three_pm():
+    now = datetime.now(MSK).strftime('%Y-%m-%d %H:%M:%S')
+    print(f"[{now}] Подведение итогов в среду 15:00 (МСК)")
+    report, tables = generate_report()
+    unpin_poll(bot)
 
-    while True:
+    if report is None or tables == 0:
+        # Никто не проголосовал "Да"
+        bot.send_message(BOSS, "Нет данных для подсчета результатов.")
         try:
-            now = datetime.now()
-            time.sleep(10)
-
+            bot.send_message(MAGIC_CHAT_ID, "Реки пива на этой неделе останутся нетронутыми..")
+            bot.send_message(BARTENDER, "Привет, сегодня без брони. У магов неделя трезвости.")
         except Exception as e:
-            logger.error(f"Критическая ошибка в планировщике: {e}", exc_info=True)
-            time.sleep(60)  # Увеличенная пауза при ошибке
+            print(f"Ошибка при отправке 'не придем' бармену: {e}")
+        clear_poll_results()
+        clear_poll_id()
+        return
+
+    try:
+        bot.send_message(BOSS, "Голосование завершено АВТОМАТИЧЕСКИ.")
+        bot.send_message(BOSS, report)
+        send_reservation_buttons(BOSS)
+        bot.send_message(
+            MAGIC_CHAT_ID,
+            "Голосование завершено.\nВсем проголосовавшим летит плотная респектуля.\nРезультаты опроса отправлены Боссу."
+        )
+    except Exception as e:
+        print(f"Ошибка при отправке результатов Боссу: {e}")
+        try:
+            bot.send_message(BOSS, "Ошибка при отправке результатов, Босс.")
+        except:
+            pass
+
+
+def run_scheduler():
+    schedule.every().saturday.at("14:38", "Europe/Moscow").do(monday_ten_am)
+    schedule.every().saturday.at("14:40", "Europe/Moscow").do(wednesday_three_pm)
+
+    def scheduler_loop():
+        while True:
+            schedule.run_pending()
+            time.sleep(10)  # Проверяем каждые 10 секунд
+
+    threading.Thread(target=scheduler_loop, daemon=True).start()

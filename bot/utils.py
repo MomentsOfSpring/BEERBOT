@@ -1,5 +1,6 @@
 import json
 import logging
+from datetime import datetime, timedelta
 
 from config import POLL_DATA_FILE, POLL_RESULTS
 
@@ -111,5 +112,12 @@ def clear_poll_id():
         logger.info("ID опроса очищен.")
     except Exception as e:
         logger.error(f"Ошибка при очистке ID опроса: {e}")
+
+def get_next_wednesday():
+    today = datetime.now()
+    days_ahead = (2 - today.weekday()) % 7  # 2 = среда
+    if days_ahead == 0:
+        days_ahead = 7
+    return today + timedelta(days=days_ahead)
 
 

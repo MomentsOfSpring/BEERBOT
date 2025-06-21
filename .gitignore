@@ -1,3 +1,2 @@
-# ... существующий .gitignore ...
-config.py
-.env 
+   config.py
+   .env

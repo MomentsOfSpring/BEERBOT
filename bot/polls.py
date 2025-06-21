@@ -1,8 +1,7 @@
-from config import MAGIC_CHAT_ID
-from utils import save_poll, load_poll
-from scheduler import get_next_wednesday
 import logging
 
+from config import bot, MAGIC_CHAT_ID, POLL_DATA_FILE
+from utils import get_next_wednesday, save_poll, load_poll
 
 logger = logging.getLogger(__name__)
 

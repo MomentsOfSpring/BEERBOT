@@ -1,9 +1,8 @@
-import threading
 import signal
 import sys
 import logging
 
-from scheduler import schedule
+from scheduler import run_scheduler
 from handlers import register_handlers
 from config import bot
 
@@ -27,7 +26,6 @@ def signal_handler(sig, frame):
 if __name__ == '__main__':
     # Регистрируем обработчики команд
     register_handlers()
-    
     # Регистрируем обработчики сигналов
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
@@ -35,8 +33,7 @@ if __name__ == '__main__':
     try:
         logger.info('Запуск планировщика...')
         # Запускаем планировщик в отдельном потоке
-        scheduler_thread = threading.Thread(target=schedule, daemon=True)
-        scheduler_thread.start()
+        run_scheduler()
         
         logger.info('Бот запущен...')
         bot.polling(none_stop=True, interval=1, timeout=60)
