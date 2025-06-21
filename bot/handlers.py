@@ -1,7 +1,7 @@
 from config import bot
 from commands import (
     invite_link, beer_rules, greet_new_members, help_command,
-    info, manual_poll, manual_gameon, manual_poll_results
+    info, manual_poll, manual_gameon, manual_poll_results, plus_friends, minus_friends
 )
 from callbacks import callback_message
 from utils import save_yes_vote
@@ -28,6 +28,11 @@ def register_handlers():
     
     # Обработчик команды /pollres
     bot.message_handler(commands=['pollres'])(manual_poll_results)
+
+    # Обработчик команды /plusfriends
+    bot.message_handler(commands=['plusfriends'])(plus_friends)
+    # Обработчик команды /minusfriends
+    bot.message_handler(commands=['minusfriends'])(minus_friends)
     
 # === HANDLERS ===
     # Обработчик новых участников

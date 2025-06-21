@@ -64,3 +64,4 @@ bot = TeleBot(TOKEN)
 # DATA:
 POLL_DATA_FILE = "poll_id.json"
 POLL_RESULTS = "votes.json"
+FRIENDS_FILE = 'friends.json' 

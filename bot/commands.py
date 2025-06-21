@@ -5,13 +5,14 @@ from telebot import types
 from permissions import boss_only
 from config import bot, BOSS, PHOTOS, RULES_FILE, HELP_FILE, INVITE, MAGIC_CHAT_ID, BARTENDER
 from polls import create_poll, unpin_poll
-from utils import generate_report, clear_poll_results, clear_poll_id
+from utils import generate_report, clear_poll_results, clear_poll_id, load_yes_votes, set_friends, remove_friends
 from buttons import send_reservation_buttons
 
 
 # Логирование
 logger = logging.getLogger(__name__)
 
+user_states = {}  # user_id: {"state": "waiting_friends", "type": "plus"/"minus"}
 
 # Обработка команды /help
 def help_command(message):
@@ -67,6 +68,23 @@ def beer_rules(message):
         bot.send_message(message.chat.id, "Произошла ошибка при чтении правил")
 
 
+def plus_friends(message):
+    user_id = message.from_user.id
+    yes_voters = [u['id'] for u in load_yes_votes()]
+    
+    if user_id not in yes_voters:
+        bot.send_message(message.chat.id, "Ты не голосовал 'Да', поэтому не можешь привести друзей 🍺")
+        return
+
+    user_states[user_id] = {"state": "waiting_friends", "type": "plus"}
+    bot.send_message(message.chat.id, "Сколько друзей придет с тобой? Введи число.")
+
+
+def minus_friends(message):
+    user_id = message.from_user.id
+    user_states[user_id] = {"state": "waiting_friends", "type": "minus"}
+    bot.send_message(message.chat.id, "На сколько друзей меньше? Введи число.")
+
 # Обработка нового участника
 def greet_new_members(message):
     chat_id = message.chat.id
@@ -121,6 +139,43 @@ def info(message):
     # Стас Special
     elif "стас" in message.text.lower():
         bot.reply_to(message, f"Блинб, Стас.... 🤤 ")
+        
+    # Friends
+    if message.from_user.id in user_states:
+        state = user_states[message.from_user.id]
+        if state["state"] == "waiting_friends":
+            try:
+                count = int(message.text.strip())
+            except ValueError:
+                bot.send_message(message.chat.id, "Укажи число друзей, дружище")
+                return
+
+            if state["type"] == "plus":
+                if count <= 0:
+                    bot.send_message(message.chat.id, "У тебя чё друзья в отрицательных и нейтральных числах измеряются, умник?")
+                    return
+                set_friends(message.from_user, count)
+                bot.send_message(message.chat.id, f"Отлично! Добавил {count} друга(-ей) в список пивохлебов")
+
+            elif state["type"] == "minus":
+                from utils import load_friends, save_friends
+
+                friends = load_friends()
+                for f in friends:
+                    if f['id'] == message.from_user.id:
+                        f['count'] -= count
+                        if f['count'] <= 0:
+                            remove_friends(message.from_user)
+                            bot.send_message(message.chat.id, "У тебя больше нет друзей.")
+                        else:
+                            save_friends(friends)
+                            bot.send_message(message.chat.id, f"Окей, теперь с тобой придет {f['count']} друг(-а)")
+                        break
+                else:
+                    bot.send_message(message.chat.id, "Ты ещё не добавлял друзей.")
+            
+            user_states.pop(message.from_user.id, None)
+            return
 
 
 # ============================== КОМАНДЫ РУЧНОГО ЗАПУСКА ==============================

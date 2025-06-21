@@ -2,7 +2,7 @@ import json
 import logging
 from datetime import datetime, timedelta
 
-from config import POLL_DATA_FILE, POLL_RESULTS
+from config import POLL_DATA_FILE, POLL_RESULTS, FRIENDS_FILE
 
 
 
@@ -73,11 +73,12 @@ def load_yes_votes():
 # Функция создания опроса:
 def generate_report():
     voters = load_yes_votes()
+    friends = load_friends()
 
     if not voters:
         return None, 0  # <- теперь возвращаем кортеж (None, 0)
 
-    total = len(voters)
+    total = len(voters) + sum(f["count"] for f in friends)
     tables = (total + 3) // 4  # округление вверх, 4 человека за стол
 
     report_lines = [
@@ -89,8 +90,13 @@ def generate_report():
     ]
 
     for i, user in enumerate(voters, 1):
-        name = f"{user['first_name']} {user['last_name']}".strip()
-        report_lines.append(f"{i}. {name} (id: {user['id']})")
+        line = f"{i}. {user['first_name']} {user['last_name']}".strip()
+        for f in friends:
+            if f["id"] == user["id"]:
+                line += f" +{f['count']} друг(-а)"
+                break
+        line += f" (id: {user['id']})"
+        report_lines.append(line)
 
     return "\n".join(report_lines), tables  # <- возвращаем кортеж
 
@@ -101,6 +107,8 @@ def clear_poll_results():
         with open(POLL_RESULTS, 'w') as f:
             json.dump([], f)
         logger.info("Результаты опроса очищены.")
+        with open(FRIENDS_FILE, 'w') as f:
+            f.write('[]')
     except Exception as e:
         logger.error(f"Ошибка при очистке результатов опроса: {e}")
 
@@ -121,3 +129,41 @@ def get_next_wednesday():
     return today + timedelta(days=days_ahead)
 
 
+# Загрузка друзей
+def load_friends():
+    try:
+        with open(FRIENDS_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
+
+
+# Сохранение
+def save_friends(data):
+    with open(FRIENDS_FILE, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+
+# Добавление или обновление
+def set_friends(user, count):
+    friends = load_friends()
+    for f in friends:
+        if f['id'] == user.id:
+            f['count'] = count
+            save_friends(friends)
+            return
+    friends.append({
+        "id": user.id,
+        "username": user.username,
+        "first_name": user.first_name,
+        "last_name": user.last_name or "",
+        "count": count
+    })
+    save_friends(friends)
+
+
+# Удаление если ноль
+def remove_friends(user):
+    friends = load_friends()
+    friends = [f for f in friends if f['id'] != user.id]
+    save_friends(friends)
