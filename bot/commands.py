@@ -227,7 +227,6 @@ def manual_poll_results(message):
 def manual_gameon(message):
     """ПОЖЕЛАТЬ ХОРОШЕЙ ИГРЫ ВРУЧНУЮ"""
     bot.send_message(MAGIC_CHAT_ID, "Хорошей игры, господа маги!\nПусть победит хоть кто-нибудь, а напьется пива сильнейший!")
-    bot.send_message(BOSS, "Пожелание хорошей игры запущено вручную.")
 
 
 

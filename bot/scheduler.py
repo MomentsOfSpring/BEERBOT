@@ -69,9 +69,16 @@ def wednesday_three_pm():
             pass
 
 
+def wednesday_six_pm():
+    now = datetime.now(MSK).strftime('%Y-%m-%d %H:%M:%S')
+    print(f"[{now}] Запуск пожелания хорошей игры")
+    bot.send_message(MAGIC_CHAT_ID, "Хорошей игры, господа маги!\nПусть победит хоть кто-нибудь, а напьется пива сильнейший!")
+
+
 def run_scheduler():
     schedule.every().monday.at("10:00", "Europe/Moscow").do(lambda: (monday_ten_am(), update_last_run("poll_created")))
     schedule.every().wednesday.at("15:00", "Europe/Moscow").do(lambda: (wednesday_three_pm(), update_last_run("results_sent")))
+    schedule.every().wednesday.at("18:00", "Europe/Moscow").do(wednesday_six_pm)
 
     check_missed_tasks()
 

@@ -51,10 +51,11 @@ MAGIC_CHAT_ID = int(MAGIC_CHAT_ID)
 INVITE = os.getenv("INVITE")
 
 # PERSONS:
+ADMIN = int(os.getenv("ADMIN"))
 BOSS = int(os.getenv("BOSS"))
 STAS = int(os.getenv("STAS"))
 SIMON = int(os.getenv("SIMON"))
-BOSSES = [BOSS, STAS, SIMON]
+BOSSES = [ADMIN, BOSS, STAS, SIMON]
 
 BARTENDER = int(os.getenv("BARTENDER"))
 
