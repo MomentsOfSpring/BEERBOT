@@ -67,8 +67,8 @@ def wednesday_three_pm():
 
 
 def run_scheduler():
-    schedule.every().saturday.at("14:38", "Europe/Moscow").do(monday_ten_am)
-    schedule.every().saturday.at("14:40", "Europe/Moscow").do(wednesday_three_pm)
+    schedule.every().monday.at("10:00", "Europe/Moscow").do(monday_ten_am)
+    schedule.every().wednesday.at("15:00", "Europe/Moscow").do(wednesday_three_pm)
 
     def scheduler_loop():
         while True:

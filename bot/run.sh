@@ -1,4 +1,4 @@
 #!/bin/bash
-cd /home/username/beerbot
+cd /home/elsmirroad/beerbot
 source venv/bin/activate
 python bot.py

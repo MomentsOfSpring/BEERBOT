@@ -5,6 +5,7 @@ import logging
 from scheduler import run_scheduler
 from handlers import register_handlers
 from config import bot
+from polls import restore_poll_state
 
 # Настройка логирования
 logging.basicConfig(
@@ -31,8 +32,10 @@ if __name__ == '__main__':
     signal.signal(signal.SIGTERM, signal_handler)
     
     try:
+        logger.info('Восстановление состояния опроса...')
+        restore_poll_state(bot)
+        
         logger.info('Запуск планировщика...')
-        # Запускаем планировщик в отдельном потоке
         run_scheduler()
         
         logger.info('Бот запущен...')

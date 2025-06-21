@@ -1,2 +1,11 @@
-   config.py
-   .env
+*.pyc
+__pycache__/
+.idea/
+poll_id.json
+votes.json
+
+# Environments
+.env
+venv/
+
+run.sh

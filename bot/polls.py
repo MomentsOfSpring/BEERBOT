@@ -1,7 +1,8 @@
 import logging
 
 from config import bot, MAGIC_CHAT_ID, POLL_DATA_FILE
-from utils import get_next_wednesday, save_poll, load_poll
+from utils import get_next_wednesday, save_poll, load_poll, save_yes_vote, load_yes_votes
+from telebot.types import PollAnswer
 
 logger = logging.getLogger(__name__)
 
@@ -46,3 +47,20 @@ def unpin_poll(bot):
     except Exception as e:
         logger.error(f"Ошибка при откреплении опроса: {e}")
         return False
+    
+def restore_poll_state(bot):
+    chat_id, message_id = load_poll()
+    if not chat_id or not message_id:
+        return  # ничего не восстановим
+
+    # Получим активный список голосов (если получится)
+    try:
+        updates = bot.get_updates()
+        for update in updates:
+            if update.poll_answer:
+                poll_answer: PollAnswer = update.poll_answer
+                if 0 in poll_answer.option_ids:  # 0 — это "Да", предполагаем
+                    user = poll_answer.user
+                    save_yes_vote(user)
+    except Exception as e:
+        print(f"Ошибка при восстановлении голосов: {e}")
