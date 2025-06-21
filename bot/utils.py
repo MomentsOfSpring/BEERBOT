@@ -2,22 +2,21 @@ import json
 import logging
 from datetime import datetime, timedelta
 
-from config import POLL_DATA_FILE, POLL_RESULTS, FRIENDS_FILE
-
+from config import POLL_DATA_FILE, POLL_RESULTS, FRIENDS_FILE, MAGIC_CHAT_ID
 
 
 logger = logging.getLogger(__name__)
 
 
 # Сохранение опроса:
-def save_poll(chat_id, message_id):
+def save_poll(message_id, poll_id):
     try:
         with open(POLL_DATA_FILE, 'w') as f:
             json.dump({
-                "chat_id": chat_id,
-                "message_id": message_id
+                "message_id": message_id,
+                "poll_id": poll_id
             }, f)
-        logger.info(f"Опрос сохранён: chat_id={chat_id}, message_id={message_id}")
+        logger.info(f"ID опроса сохранён: message_id={message_id}, poll_id={poll_id}")
     except Exception as e:
         logger.error(f"Ошибка при сохранении опроса: {e}")
 
@@ -27,13 +26,23 @@ def load_poll():
     try:
         with open(POLL_DATA_FILE, 'r') as f:
             data = json.load(f)
-            logger.info(f"Опрос загружен: chat_id={data['chat_id']}, message_id={data['message_id']}")
-            return data["chat_id"], data["message_id"]
+        
+        message_id = data.get("message_id")
+        poll_id = data.get("poll_id")
+
+        if not message_id or not poll_id:
+            logger.warning("Файл опроса не содержит message_id или poll_id.")
+            return None, None, None
+            
+        logger.info(f"Опрос загружен: chat_id={MAGIC_CHAT_ID}, message_id={message_id}, poll_id={poll_id}")
+        return MAGIC_CHAT_ID, message_id, poll_id
+
     except FileNotFoundError:
         logger.warning("Файл с ID опроса не найден.")
-    except (KeyError, json.JSONDecodeError) as e:
-        logger.error(f"Ошибка при чтении файла опроса: {e}")
-    return None, None
+        return None, None, None
+    except json.JSONDecodeError:
+        logger.error("Ошибка декодирования JSON в файле опроса.")
+        return None, None, None
 
 
 # Сохранение любителей пива и карточек:

@@ -4,7 +4,7 @@ from commands import (
     info, manual_poll, manual_gameon, manual_poll_results, plus_friends, minus_friends
 )
 from callbacks import callback_message
-from utils import save_yes_vote
+from utils import save_yes_vote, load_poll
 
 def register_handlers():
 # === COMMANDS ===
@@ -46,6 +46,15 @@ def register_handlers():
 
 @bot.poll_answer_handler()
 def handle_poll_answer(poll_answer):
+    _, _, active_poll_id = load_poll()
+
+    if active_poll_id is None:
+        return # Нет активного опроса, нечего обрабатывать
+
+    if poll_answer.poll_id != active_poll_id:
+        print(f"Получен голос к старому опросу ({poll_answer.poll_id}). Игнорируем.")
+        return
+
     # "Да" — это индекс 0
     if 0 in poll_answer.option_ids:
         save_yes_vote(poll_answer.user)

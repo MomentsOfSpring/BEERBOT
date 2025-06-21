@@ -3,6 +3,8 @@ __pycache__/
 .idea/
 poll_id.json
 votes.json
+task_state.json
+friends.json
 
 # Environments
 .env

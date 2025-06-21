@@ -147,7 +147,7 @@ def info(message):
             try:
                 count = int(message.text.strip())
             except ValueError:
-                bot.send_message(message.chat.id, "Укажи число друзей, дружище")
+                bot.send_message(message.chat.id, "Укажи ЧИСЛО, Дружище!")
                 return
 
             if state["type"] == "plus":
@@ -155,7 +155,7 @@ def info(message):
                     bot.send_message(message.chat.id, "У тебя чё друзья в отрицательных и нейтральных числах измеряются, умник?")
                     return
                 set_friends(message.from_user, count)
-                bot.send_message(message.chat.id, f"Отлично! Добавил {count} друга(-ей) в список пивохлебов")
+                bot.send_message(message.chat.id, f"Отлично! Зафиксировал тебе {count} корешей.\nКоличество гедонистов-лудоманом неумолимо растет!\nТак держать!")
 
             elif state["type"] == "minus":
                 from utils import load_friends, save_friends

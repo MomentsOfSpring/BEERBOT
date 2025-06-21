@@ -20,7 +20,7 @@ def create_poll(bot):
         )
         logger.info(f"Опрос отправлен: message_id={poll_message.message_id} на {wednesday_date}")
 
-        save_poll(MAGIC_CHAT_ID, poll_message.message_id)
+        save_poll(poll_message.message_id, poll_message.poll.id)
         logger.info("Опрос сохранён")
 
         bot.pin_chat_message(
@@ -35,7 +35,7 @@ def create_poll(bot):
 
 
 def unpin_poll(bot):
-    chat_id, message_id = load_poll()
+    chat_id, message_id, _ = load_poll()
     if not chat_id or not message_id:
         logger.warning("Не найдено сохранённого опроса для открепления.")
         return False
@@ -49,7 +49,7 @@ def unpin_poll(bot):
         return False
     
 def restore_poll_state(bot):
-    chat_id, message_id = load_poll()
+    chat_id, message_id, _ = load_poll()
     if not chat_id or not message_id:
         return  # ничего не восстановим
 
