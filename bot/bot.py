@@ -1,6 +1,7 @@
 import signal
 import sys
 import logging
+from logging.handlers import RotatingFileHandler
 
 from scheduler import run_scheduler
 from handlers import register_handlers
@@ -8,13 +9,32 @@ from config import bot
 from polls import restore_poll_state
 
 # Настройка логирования
-logging.basicConfig(
-    level=logging.INFO,
-    format='[%(asctime)s] - %(levelname)s - %(name)s - %(message)s'
-)
+log_formatter = logging.Formatter('[%(asctime)s] - %(levelname)s - %(name)s - %(message)s')
 
+# Логирование в файл
+file_handler = RotatingFileHandler('beerbot.log', maxBytes=5*1024*1024, backupCount=2, encoding='utf-8')
+file_handler.setFormatter(log_formatter)
+file_handler.setLevel(logging.INFO)
 
-logger = logging.getLogger(__name__)
+# Логирование в консоль
+console_handler = logging.StreamHandler()
+console_handler.setFormatter(log_formatter)
+console_handler.setLevel(logging.INFO)
+
+# Добавляем оба обработчика
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+logger.addHandler(file_handler)
+logger.addHandler(console_handler)
+
+# Убираем стандартный обработчик, чтобы избежать дублирования
+logging.getLogger('__main__').propagate = False
+logging.getLogger('utils').propagate = False
+logging.getLogger('polls').propagate = False
+logging.getLogger('scheduler').propagate = False
+logging.getLogger('commands').propagate = False
+logging.getLogger('callbacks').propagate = False
+logging.getLogger('permissions').propagate = False
 
 
 def signal_handler(sig, frame):

@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  beerbot:
+    build: .
+    container_name: beerbot
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - .:/app 

@@ -1,6 +1,8 @@
 *.pyc
 __pycache__/
 .idea/
+
+# json'ы
 poll_id.json
 votes.json
 task_state.json
@@ -11,3 +13,10 @@ friends.json
 venv/
 
 run.sh
+
+# Log files
+beerbot.log
+
+# Docker
+.dockerignore
+docker-compose.override.yml
