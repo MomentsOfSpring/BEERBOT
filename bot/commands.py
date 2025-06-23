@@ -113,6 +113,7 @@ def greet_new_members(message):
 
 # Обработка триггеров на текст:
 def info(message):
+    print(f"INFO: chat_id={message.chat.id}, user_id={message.from_user.id}, text={message.text}")
 
     # Вежливость в первую очередь.
     if 'привет' in message.text.lower():
