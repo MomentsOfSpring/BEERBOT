@@ -7,12 +7,11 @@ from config import bot, BOSS, PHOTOS, RULES_FILE, HELP_FILE, INVITE, MAGIC_CHAT_
 from polls import create_poll, unpin_poll
 from utils import generate_report, clear_poll_results, clear_poll_id, load_yes_votes, set_friends, remove_friends
 from buttons import send_reservation_buttons
+from state import user_states
 
 
 # Логирование
 logger = logging.getLogger(__name__)
-
-user_states = {}  # user_id: {"state": "waiting_friends", "type": "plus"/"minus"}
 
 # Обработка команды /help
 def help_command(message):
