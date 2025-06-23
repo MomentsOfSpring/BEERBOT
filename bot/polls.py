@@ -1,10 +1,25 @@
 import logging
 
 from config import bot, MAGIC_CHAT_ID, POLL_DATA_FILE
-from utils import get_next_wednesday, save_poll, load_poll, save_yes_vote, load_yes_votes
+from utils import get_next_wednesday, save_poll, load_poll, save_yes_vote, load_yes_votes, remove_yes_vote
 from telebot.types import PollAnswer
 
 logger = logging.getLogger(__name__)
+
+
+def handle_poll_answer(poll_answer: PollAnswer):
+    """Обработчик ответов в опросе"""
+    try:
+        # Если пользователь выбрал "Да" (option_id = 0)
+        if 0 in poll_answer.option_ids:
+            user = poll_answer.user
+            save_yes_vote(user)
+        # Если пользователь выбрал "Нет" (option_id = 1) или отменил свой голос (пустой список)
+        else:
+            user = poll_answer.user
+            remove_yes_vote(user.id)
+    except Exception as e:
+        logger.error(f"Ошибка при обработке голоса: {e}")
 
 
 def create_poll(bot):

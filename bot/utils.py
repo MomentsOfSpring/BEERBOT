@@ -79,6 +79,24 @@ def load_yes_votes():
         return []
 
 
+# Удаление голоса "Да":
+def remove_yes_vote(user_id):
+    try:
+        results = load_yes_votes()
+        # Фильтруем список, оставляя только тех пользователей, чей ID не совпадает с указанным
+        updated_results = [vote for vote in results if vote["id"] != user_id]
+        
+        # Сохраняем обновленный список
+        with open(POLL_RESULTS, 'w') as f:
+            json.dump(updated_results, f, ensure_ascii=False, indent=2)
+        
+        logger.info(f"Удален голос пользователя с ID: {user_id}")
+        return True
+    except Exception as e:
+        logger.error(f"Ошибка при удалении голоса: {e}")
+        return False
+
+
 # Функция создания опроса:
 def generate_report():
     voters = load_yes_votes()

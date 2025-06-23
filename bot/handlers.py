@@ -5,6 +5,7 @@ from commands import (
 )
 from callbacks import callback_message
 from utils import save_yes_vote, load_poll
+from polls import handle_poll_answer as process_poll_answer
 
 def register_handlers():
 # === COMMANDS ===
@@ -55,6 +56,5 @@ def handle_poll_answer(poll_answer):
         print(f"Получен голос к старому опросу ({poll_answer.poll_id}). Игнорируем.")
         return
 
-    # "Да" — это индекс 0
-    if 0 in poll_answer.option_ids:
-        save_yes_vote(poll_answer.user)
+    # Обрабатываем голос с помощью новой функции
+    process_poll_answer(poll_answer)
