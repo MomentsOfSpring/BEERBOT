@@ -69,20 +69,22 @@ def beer_rules(message):
 
 def plus_friends(message):
     user_id = message.from_user.id
+    chat_id = message.chat.id
     yes_voters = [u['id'] for u in load_yes_votes()]
     
     if user_id not in yes_voters:
-        bot.send_message(message.chat.id, "Ты не голосовал 'Да', поэтому не можешь привести друзей 🍺")
+        bot.send_message(chat_id, "Ты не голосовал 'Да', поэтому не можешь привести друзей 🍺")
         return
 
-    user_states[user_id] = {"state": "waiting_friends", "type": "plus"}
-    bot.send_message(message.chat.id, "Сколько друзей придет с тобой? Введи число.")
+    user_states[(user_id, chat_id)] = {"state": "waiting_friends", "type": "plus"}
+    bot.send_message(chat_id, "Сколько друзей придет с тобой? Введи число.")
 
 
 def minus_friends(message):
     user_id = message.from_user.id
-    user_states[user_id] = {"state": "waiting_friends", "type": "minus"}
-    bot.send_message(message.chat.id, "На сколько друзей меньше? Введи число.")
+    chat_id = message.chat.id
+    user_states[(user_id, chat_id)] = {"state": "waiting_friends", "type": "minus"}
+    bot.send_message(chat_id, "На сколько друзей меньше? Введи число.")
 
 # Обработка нового участника
 def greet_new_members(message):
@@ -140,8 +142,9 @@ def info(message):
         bot.reply_to(message, f"Блинб, Стас.... 🤤 ")
         
     # Friends
-    if message.from_user.id in user_states:
-        state = user_states[message.from_user.id]
+    key = (message.from_user.id, message.chat.id)
+    if key in user_states:
+        state = user_states[key]
         if state["state"] == "waiting_friends":
             try:
                 count = int(message.text.strip())
@@ -173,7 +176,7 @@ def info(message):
                 else:
                     bot.send_message(message.chat.id, "Ты ещё не добавлял друзей.")
             
-            user_states.pop(message.from_user.id, None)
+            user_states.pop(key, None)
             return
 
 
