@@ -123,10 +123,18 @@ def info(message):
     # CEDH CLUB
     elif (("cedh" in message.text.lower()
           or "cdh" in message.text.lower()
+          or "сedh" in message.text.lower()
+          or "сеdh" in message.text.lower()
+          or "cеdh" in message.text.lower()
+          or "сидиэйч" in message.text.lower()
+          or "сиидиэйч" in message.text.lower()
           or "цедх" in message.text.lower()
-          or "цдх" in message.text.lower())
+          or "цeдх" in message.text.lower()
+          or "цедx" in message.text.lower()
+          or "цeдx" in message.text.lower()
+          or "цдх" in message.text.lower()
           or "компот" in message.text.lower()
-          or "компетитив" in message.text.lower()):
+          or "компетитив" in message.text.lower())):
         bot.reply_to(message, "Ни слова про CEDH в этом чате!")
 
     # Glory to Bot
@@ -158,7 +166,7 @@ def info(message):
                     bot.send_message(message.chat.id, "У тебя чё друзья в отрицательных и нейтральных числах измеряются, умник?")
                     return
                 set_friends(message.from_user, count)
-                bot.send_message(message.chat.id, f"Отлично! Зафиксировал тебе {count} корешей.\nКоличество гедонистов-лудоманом неумолимо растет!\nТак держать!")
+                bot.send_message(message.chat.id, f"Отлично! Зафиксировал тебе {count} корешей.\nКоличество гедонистов-лудоманов неумолимо растет!\nТак держать!")
 
             elif state["type"] == "minus":
                 from utils import load_friends, save_friends
