@@ -29,7 +29,7 @@ def create_poll(bot):
         poll_message = bot.send_poll(
             MAGIC_CHAT_ID,
             question=f"Магия, среда, {wednesday_date}. Придешь?",
-            options=["Да", "Нет"],
+            options=["Да", "Пиздa"],
             is_anonymous=False,
             allows_multiple_answers=False
         )
