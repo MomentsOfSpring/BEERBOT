@@ -450,7 +450,7 @@ def shout_command(message):
         return
     
     user_states[(user_id, chat_id)] = {"state": "waiting_shout_text"}
-    bot.send_message(ADMIN, "Введите текст анонса, который будет отправлен в групповой чат:")
+    bot.send_message(chat_id, "Введите текст анонса, который будет отправлен в групповой чат:")
 
 
 
