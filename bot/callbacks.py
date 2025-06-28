@@ -1,8 +1,10 @@
 from telebot import types
-from config import MAGIC_CHAT_ID, BOSS, BARTENDER, bot
+from config import MAGIC_CHAT_ID, BOSS, BARTENDER, bot, BOSSES
 from commands import beer_rules
 from buttons import send_reservation_buttons
 from utils import generate_report, clear_poll_results, clear_poll_id
+from events import get_confirmation_keyboard, delete_event, send_event_cancellation_notification, unpin_event_poll, handle_event_poll_answer
+from state import user_states
 
 
 def callback_message(callback):
@@ -65,6 +67,93 @@ def callback_message(callback):
     elif data == 'RULES':
         beer_rules(callback.message)
 
+    # --- Удаление события: выбор события ---
+    elif data.startswith("delete_event_"):
+        if user_id not in BOSSES:  # Только боссы могут удалять события
+            bot.answer_callback_query(callback.id, "У вас нет прав для удаления событий!", show_alert=True)
+            return
+            
+        event_id = data.replace("delete_event_", "")
+        keyboard = get_confirmation_keyboard(event_id)
+        
+        bot.edit_message_text(
+            chat_id=chat_id,
+            message_id=message_id,
+            text="Точно удалить ивент?",
+            reply_markup=keyboard
+        )
+
+    # --- Подтверждение удаления события ---
+    elif data.startswith("confirm_delete_"):
+        if user_id not in BOSSES:  # Только боссы могут удалять события
+            bot.answer_callback_query(callback.id, "У вас нет прав для удаления событий!", show_alert=True)
+            return
+            
+        event_id = data.replace("confirm_delete_", "")
+        
+        # Отправляем уведомление об отмене
+        send_event_cancellation_notification(event_id)
+        
+        # Открепляем опрос
+        unpin_event_poll(event_id)
+        
+        # Удаляем событие
+        if delete_event(event_id):
+            bot.edit_message_text(
+                chat_id=chat_id,
+                message_id=message_id,
+                text="✅ Событие удалено!"
+            )
+        else:
+            bot.edit_message_text(
+                chat_id=chat_id,
+                message_id=message_id,
+                text="❌ Ошибка при удалении события!"
+            )
+
+    # --- Отмена удаления события ---
+    elif data == "cancel_delete":
+        bot.edit_message_text(
+            chat_id=chat_id,
+            message_id=message_id,
+            text="Удаление отменено."
+        )
+
+    # --- Выбор события для добавления/удаления друзей ---
+    elif data.startswith("event_friends_"):
+        event_id = data.replace("event_friends_", "")
+        
+        # Получаем текущее состояние пользователя
+        key = (user_id, chat_id)
+        if key not in user_states:
+            bot.answer_callback_query(callback.id, "Ошибка: состояние не найдено", show_alert=True)
+            return
+            
+        state = user_states[key]
+        if state["state"] != "waiting_event_friends":
+            bot.answer_callback_query(callback.id, "Ошибка: неверное состояние", show_alert=True)
+            return
+        
+        # Сохраняем выбранное событие
+        state["event_id"] = event_id
+        user_states[key] = state
+        
+        # Получаем информацию о событии
+        from events import get_event_by_id
+        event = get_event_by_id(event_id)
+        
+        if not event:
+            bot.answer_callback_query(callback.id, "Событие не найдено", show_alert=True)
+            user_states.pop(key, None)
+            return
+        
+        action_type = "добавления" if state["type"] == "plus" else "удаления"
+        bot.edit_message_text(
+            chat_id=chat_id,
+            message_id=message_id,
+            text=f"Выбрано событие: {event['title']} - {event['date']} {event['time']}\n\nСколько друзей {action_type}? Введи число."
+        )
+
     # --- Босс нажал "Забронировать стол" ---
     elif data == 'book_table':
         report, tables = generate_report()
@@ -100,3 +189,20 @@ def callback_message(callback):
             clear_poll_id()
         except Exception as e:
             print(f"Ошибка при отправке отказа бармену: {e}")
+
+
+def handle_poll_answer_callback(poll_answer):
+    """Обработчик ответов в опросах"""
+    # Проверяем, является ли это опросом события
+    from events import load_all_events
+    events = load_all_events()
+    
+    for event in events:
+        if event.get('poll_id') == poll_answer.poll_id:
+            # Это опрос события
+            handle_event_poll_answer(poll_answer)
+            return
+    
+    # Если не нашли событие, это обычный опрос
+    from polls import handle_poll_answer
+    handle_poll_answer(poll_answer)

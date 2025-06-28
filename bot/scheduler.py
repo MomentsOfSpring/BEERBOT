@@ -10,6 +10,7 @@ from polls import create_poll, unpin_poll
 from utils import generate_report, clear_poll_results, clear_poll_id
 from buttons import send_reservation_buttons
 from task_state import was_task_already_run, update_last_run, clear_state
+from events import schedule_event_notifications
 
 
 logger = logging.getLogger(__name__)
@@ -79,6 +80,9 @@ def run_scheduler():
     schedule.every().monday.at("10:00", "Europe/Moscow").do(lambda: (monday_ten_am(), update_last_run("poll_created")))
     schedule.every().wednesday.at("15:00", "Europe/Moscow").do(lambda: (wednesday_three_pm(), update_last_run("results_sent")))
     schedule.every().wednesday.at("18:00", "Europe/Moscow").do(wednesday_six_pm)
+    
+    # Проверка событий каждые 5 минут
+    schedule.every(5).minutes.do(schedule_event_notifications)
 
     check_missed_tasks()
 

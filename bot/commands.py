@@ -1,13 +1,16 @@
 import os
 import logging
+import re
+from datetime import datetime
 
 from telebot import types
-from permissions import boss_only
+from permissions import boss_only, admin_only
 from config import bot, BOSS, PHOTOS, RULES_FILE, HELP_FILE, INVITE, MAGIC_CHAT_ID, BARTENDER
 from polls import create_poll, unpin_poll
 from utils import generate_report, clear_poll_results, clear_poll_id, load_yes_votes, set_friends, remove_friends
 from buttons import send_reservation_buttons
 from state import user_states
+from events import create_event_poll, get_events_keyboard, get_confirmation_keyboard, delete_event, send_event_cancellation_notification, unpin_event_poll, get_events_list, get_events_keyboard_for_friends, add_event_friends, remove_event_friends
 
 
 # Логирование
@@ -55,7 +58,7 @@ def beer_rules(message):
             bot.send_media_group(message.chat.id, media)
         except Exception as e:
             logger.error(f"Ошибка при отправке медиагруппы: {e}")
-            bot.send_message(message.chat.id, "Произошла ошибка при отправке изображений")
+            bot.send_message(ADMIN, "Произошла ошибка при отправке изображений")
     
     # Обработка текста правил
     try:
@@ -154,6 +157,8 @@ def info(message):
     key = (message.from_user.id, message.chat.id)
     if key in user_states:
         state = user_states[key]
+        
+        # Обработка состояний для друзей
         if state["state"] == "waiting_friends":
             try:
                 count = int(message.text.strip())
@@ -187,6 +192,123 @@ def info(message):
             
             user_states.pop(key, None)
             return
+            
+        # Обработка состояний для создания событий
+        elif state["state"] == "waiting_event_title":
+            title = message.text.strip()
+            if len(title) < 3:
+                bot.send_message(message.chat.id, "Название должно содержать минимум 3 символа. Попробуйте еще раз:")
+                return
+                
+            user_states[key] = {"state": "waiting_event_date", "title": title}
+            bot.send_message(message.chat.id, "Введите дату в формате ДД.ММ.ГГГГ:")
+            return
+            
+        elif state["state"] == "waiting_event_date":
+            date_text = message.text.strip()
+            # Проверяем формат даты
+            if not re.match(r'^\d{2}\.\d{2}\.\d{4}$', date_text):
+                bot.send_message(message.chat.id, "Неверный формат даты. Используйте формат ДД.ММ.ГГГГ:")
+                return
+                
+            try:
+                event_date = datetime.strptime(date_text, '%d.%m.%Y')
+                today = datetime.now()
+                
+                # Проверяем, что дата в будущем
+                if event_date.date() <= today.date():
+                    bot.send_message(message.chat.id, "Дата должна быть в будущем. Введите дату в формате ДД.ММ.ГГГГ:")
+                    return
+                    
+            except ValueError:
+                bot.send_message(message.chat.id, "Неверная дата. Введите дату в формате ДД.ММ.ГГГГ:")
+                return
+                
+            title = state.get("title", "")
+            user_states[key] = {"state": "waiting_event_time", "title": title, "date": date_text}
+            bot.send_message(message.chat.id, "Введите время в формате ЧЧ:ММ:")
+            return
+            
+        elif state["state"] == "waiting_event_time":
+            time_text = message.text.strip()
+            # Проверяем формат времени
+            if not re.match(r'^\d{2}:\d{2}$', time_text):
+                bot.send_message(message.chat.id, "Неверный формат времени. Используйте формат ЧЧ:ММ:")
+                return
+                
+            try:
+                event_time = datetime.strptime(time_text, '%H:%M')
+                # Проверяем, что время в разумных пределах
+                if event_time.hour < 8 or event_time.hour > 23:
+                    bot.send_message(message.chat.id, "Время должно быть между 08:00 и 23:00. Введите время в формате ЧЧ:ММ:")
+                    return
+                    
+            except ValueError:
+                bot.send_message(message.chat.id, "Неверное время. Введите время в формате ЧЧ:ММ:")
+                return
+                
+            title = state.get("title", "")
+            date = state.get("date", "")
+            
+            # Создаем событие
+            event_id, poll_message_id = create_event_poll(title, date, time_text)
+            
+            if event_id and poll_message_id:
+                bot.send_message(message.chat.id, f"✅ Событие '{title}' создано на {date} в {time_text}!")
+            else:
+                bot.send_message(message.chat.id, "❌ Ошибка при создании события. Попробуйте еще раз.")
+            
+            user_states.pop(key, None)
+            return
+            
+        # Обработка состояний для друзей событий
+        elif state["state"] == "waiting_event_friends":
+            try:
+                count = int(message.text.strip())
+            except ValueError:
+                bot.send_message(message.chat.id, "Укажи ЧИСЛО, Дружище!")
+                return
+
+            event_id = state.get("event_id")
+            if not event_id:
+                bot.send_message(message.chat.id, "Ошибка: не выбрано событие. Попробуйте еще раз.")
+                user_states.pop(key, None)
+                return
+
+            if state["type"] == "plus":
+                if count <= 0:
+                    bot.send_message(message.chat.id, "У тебя чё друзья в отрицательных и нейтральных числах измеряются, умник?")
+                    return
+                    
+                success, message_text = add_event_friends(event_id, message.from_user, count)
+                bot.send_message(message.chat.id, message_text)
+
+            elif state["type"] == "minus":
+                success, message_text = remove_event_friends(event_id, message.from_user, count)
+                bot.send_message(message.chat.id, message_text)
+            
+            user_states.pop(key, None)
+            return
+
+        # Обработка состояний для команды shout
+        elif state["state"] == "waiting_shout_text":
+            shout_text = message.text.strip()
+            
+            if len(shout_text) < 5:
+                bot.send_message(message.chat.id, "Текст анонса должен содержать минимум 5 символов. Попробуйте еще раз:")
+                return
+            
+            try:
+                # Отправляем анонс в групповой чат
+                bot.send_message(MAGIC_CHAT_ID, shout_text)
+                bot.send_message(ADMIN, "✅ Анонс успешно отправлен в групповой чат!")
+                logger.info(f"Администратор {message.from_user.first_name} отправил анонс: {shout_text[:50]}...")
+            except Exception as e:
+                bot.send_message(ADMIN, "❌ Ошибка при отправке анонса. Попробуйте еще раз.")
+                logger.error(f"Ошибка при отправке анонса: {e}")
+            
+            user_states.pop(key, None)
+            return
 
 
 # ============================== КОМАНДЫ РУЧНОГО ЗАПУСКА ==============================
@@ -197,6 +319,41 @@ def manual_poll(message):
     """СОЗДАТЬ ОПРОС ВРУЧНУЮ"""
     create_poll(bot)
     bot.send_message(BOSS, "Опрос запущен вручную.")
+
+
+# Обработка команды /events
+def events_command(message):
+    """ПОКАЗАТЬ СПИСОК НЕРЕГУЛЯРНЫХ МЕРОПРИЯТИЙ"""
+    events_list = get_events_list()
+    bot.send_message(message.chat.id, events_list)
+
+
+# Обработка команды /addevent
+@boss_only
+def add_event_command(message):
+    """СОЗДАТЬ НЕРЕГУЛЯРНОЕ МЕРОПРИЯТИЕ"""
+    user_id = message.from_user.id
+    chat_id = message.chat.id
+    
+    user_states[(user_id, chat_id)] = {"state": "waiting_event_title"}
+    bot.send_message(chat_id, "Введите название мероприятия:")
+
+
+# Обработка команды /deleteevent
+@boss_only
+def delete_event_command(message):
+    """УДАЛИТЬ НЕРЕГУЛЯРНОЕ МЕРОПРИЯТИЕ"""
+    keyboard = get_events_keyboard()
+    
+    if not keyboard:
+        bot.send_message(message.chat.id, "Нет активных нерегулярных мероприятий для удаления.")
+        return
+    
+    bot.send_message(
+        message.chat.id,
+        "Выберите мероприятие для удаления:",
+        reply_markup=keyboard
+    )
 
 
 # Обработка команды /pollres
@@ -238,6 +395,62 @@ def manual_poll_results(message):
 def manual_gameon(message):
     """ПОЖЕЛАТЬ ХОРОШЕЙ ИГРЫ ВРУЧНУЮ"""
     bot.send_message(MAGIC_CHAT_ID, "Хорошей игры, господа маги!\nПусть победит хоть кто-нибудь, а напьется пива сильнейший!")
+
+
+def plus_event_friends(message):
+    """ДОБАВИТЬ ДРУЗЕЙ НА НЕРЕГУЛЯРНОЕ МЕРОПРИЯТИЕ"""
+    keyboard = get_events_keyboard_for_friends()
+    
+    if not keyboard:
+        bot.send_message(message.chat.id, "Нет активных нерегулярных мероприятий.")
+        return
+    
+    user_id = message.from_user.id
+    chat_id = message.chat.id
+    
+    user_states[(user_id, chat_id)] = {"state": "waiting_event_friends", "type": "plus"}
+    
+    bot.send_message(
+        message.chat.id,
+        "Выберите мероприятие для добавления друзей:",
+        reply_markup=keyboard
+    )
+
+
+def minus_event_friends(message):
+    """УБРАТЬ ДРУЗЕЙ С НЕРЕГУЛЯРНОГО МЕРОПРИЯТИЯ"""
+    keyboard = get_events_keyboard_for_friends()
+    
+    if not keyboard:
+        bot.send_message(message.chat.id, "Нет активных нерегулярных мероприятий.")
+        return
+    
+    user_id = message.from_user.id
+    chat_id = message.chat.id
+    
+    user_states[(user_id, chat_id)] = {"state": "waiting_event_friends", "type": "minus"}
+    
+    bot.send_message(
+        message.chat.id,
+        "Выберите мероприятие для удаления друзей:",
+        reply_markup=keyboard
+    )
+
+
+# Обработка команды /shout
+@admin_only
+def shout_command(message):
+    """ОТПРАВИТЬ АНОНС ОТ ИМЕНИ БОТА"""
+    user_id = message.from_user.id
+    chat_id = message.chat.id
+    
+    # Проверяем, что команда вызвана в личном чате
+    if message.chat.type != 'private':
+        bot.send_message(chat_id, "Команда /shout доступна только в личном чате с ботом.")
+        return
+    
+    user_states[(user_id, chat_id)] = {"state": "waiting_shout_text"}
+    bot.send_message(ADMIN, "Введите текст анонса, который будет отправлен в групповой чат:")
 
 
 
