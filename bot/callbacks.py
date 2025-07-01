@@ -190,6 +190,27 @@ def callback_message(callback):
         except Exception as e:
             print(f"Ошибка при отправке отказа бармену: {e}")
 
+    # --- Ручная отправка результатов по нерегулярному ивенту ---
+    elif data.startswith('send_event_result_'):
+        from events import get_event_by_id, load_event_data, unpin_event_poll, save_event_data
+        event_id = data.replace('send_event_result_', '')
+        event = get_event_by_id(event_id)
+        if not event:
+            bot.answer_callback_query(callback.id, 'Событие не найдено', show_alert=True)
+            return
+        event_data = load_event_data(event_id)
+        participants_count = len(event_data['participants'])
+        friends_count = sum(f['count'] for f in event_data.get('friends', []))
+        total_count = participants_count + friends_count
+        tables = (total_count + 3) // 4
+        message = f'Привет! Сегодня маги решили нерегулярно собраться!\nВот столько человек придёт: {total_count} нужно {tables} столов.'
+        bot.send_message(BARTENDER, message)
+        unpin_event_poll(event_id)
+        save_event_data(event_id, {'participants': [], 'friends': []})
+        bot.answer_callback_query(callback.id, 'Результаты отправлены бармену и очищены!', show_alert=True)
+        bot.send_message(callback.message.chat.id, f"Результаты по '{event['title']}' отправлены бармену и очищены.")
+        return
+
 
 def handle_poll_answer_callback(poll_answer):
     """Обработчик ответов в опросах"""

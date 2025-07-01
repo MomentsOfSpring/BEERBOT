@@ -68,11 +68,6 @@ def register_handlers():
     # Обработчик callback-запросов
     bot.callback_query_handler(func=lambda call: True)(callback_message)
 
-    # Обработчик callback для ручной отправки результатов по ивенту
-    @bot.callback_query_handler(func=lambda call: call.data.startswith('send_event_result_'))
-    def _handle_send_event_result_callback(call):
-        handle_send_event_result_callback(call)
-
 @bot.poll_answer_handler()
 def handle_poll_answer(poll_answer):
     # Используем новый обработчик, который поддерживает события
