@@ -203,7 +203,7 @@ def callback_message(callback):
         friends_count = sum(f['count'] for f in event_data.get('friends', []))
         total_count = participants_count + friends_count
         tables = (total_count + 3) // 4
-        message = f'Привет! Сегодня маги решили нерегулярно собраться!\nВот столько человек придёт: {total_count} нужно {tables} столов.'
+        message = f'Привет! Сегодня маги решили нерегулярно собраться!\nВот столько человек придёт: {total_count} нужно {tables} столов.\nВремя сбора: {event["date"]} {event["time"]}'
         bot.send_message(BARTENDER, message)
         unpin_event_poll(event_id)
         save_event_data(event_id, {'participants': [], 'friends': []})
