@@ -10,7 +10,7 @@ from polls import create_poll, unpin_poll
 from utils import generate_report, clear_poll_results, clear_poll_id, load_yes_votes, set_friends, remove_friends
 from buttons import send_reservation_buttons
 from state import user_states
-from events import create_event_poll, get_events_keyboard, get_confirmation_keyboard, delete_event, send_event_cancellation_notification, unpin_event_poll, get_events_list, get_events_keyboard_for_friends, add_event_friends, remove_event_friends
+from events import create_event_poll, get_events_keyboard, get_confirmation_keyboard, delete_event, send_event_cancellation_notification, unpin_event_poll, get_events_list, get_events_keyboard_for_friends, add_event_friends, remove_event_friends, load_all_events, load_event_data
 
 
 # Логирование
@@ -451,6 +451,48 @@ def shout_command(message):
     
     user_states[(user_id, chat_id)] = {"state": "waiting_shout_text"}
     bot.send_message(chat_id, "Введите текст анонса, который будет отправлен в групповой чат:")
+
+
+# ============================== КОМАНДА РУЧНОЙ ОТПРАВКИ РЕЗУЛЬТАТОВ ПО НЕРЕГУЛЯРНОМУ ИВЕНТУ ==============================
+
+@boss_only
+def send_event_results_command(message):
+    """Ручная отправка результатов по нерегулярному ивенту бармену"""
+    events = load_all_events()
+    if not events:
+        bot.send_message(message.chat.id, "Нет активных нерегулярных мероприятий.")
+        return
+    # Клавиатура выбора события
+    markup = types.InlineKeyboardMarkup()
+    for event in events:
+        btn = types.InlineKeyboardButton(f"{event['title']} - {event['date']} {event['time']}", callback_data=f"send_event_result_{event['id']}")
+        markup.add(btn)
+    bot.send_message(message.chat.id, "Выберите мероприятие для отправки результатов бармену:", reply_markup=markup)
+
+# --- Callback обработка выбора события для отправки результатов ---
+def handle_send_event_result_callback(call):
+    data = call.data
+    if not data.startswith("send_event_result_"):
+        return
+    event_id = data.replace("send_event_result_", "")
+    event = get_event_by_id(event_id)
+    if not event:
+        bot.answer_callback_query(call.id, "Событие не найдено", show_alert=True)
+        return
+    event_data = load_event_data(event_id)
+    participants_count = len(event_data['participants'])
+    friends_count = sum(f['count'] for f in event_data.get('friends', []))
+    total_count = participants_count + friends_count
+    tables = (total_count + 3) // 4
+    # Отправляем бармену
+    message = f"Привет! Сегодня маги решили нерегулярно собраться!\nВот столько человек придёт: {total_count} нужно {tables} столов."
+    bot.send_message(BARTENDER, message)
+    # Открепляем опрос
+    unpin_event_poll(event_id)
+    # Очищаем участников и друзей
+    save_event_data(event_id, {"participants": [], "friends": []})
+    bot.answer_callback_query(call.id, "Результаты отправлены бармену и очищены!", show_alert=True)
+    bot.send_message(call.message.chat.id, f"Результаты по '{event['title']}' отправлены бармену и очищены.")
 
 
 
