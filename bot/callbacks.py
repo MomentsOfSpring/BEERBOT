@@ -192,7 +192,7 @@ def callback_message(callback):
 
     # --- Ручная отправка результатов по нерегулярному ивенту ---
     elif data.startswith('send_event_result_'):
-        from events import get_event_by_id, load_event_data, unpin_event_poll, save_event_data
+        from events import get_event_by_id, load_event_data, unpin_event_poll, save_event_data, delete_event
         event_id = data.replace('send_event_result_', '')
         event = get_event_by_id(event_id)
         if not event:
@@ -207,8 +207,9 @@ def callback_message(callback):
         bot.send_message(BARTENDER, message)
         unpin_event_poll(event_id)
         save_event_data(event_id, {'participants': [], 'friends': []})
-        bot.answer_callback_query(callback.id, 'Результаты отправлены бармену и очищены!', show_alert=True)
-        bot.send_message(callback.message.chat.id, f"Результаты по '{event['title']}' отправлены бармену и очищены.")
+        delete_event(event_id)
+        bot.answer_callback_query(callback.id, 'Результаты отправлены бармену, ивент удалён!', show_alert=True)
+        bot.send_message(callback.message.chat.id, f"Результаты по '{event['title']}' отправлены бармену и ивент удалён.")
         return
 
 
