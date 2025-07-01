@@ -120,7 +120,8 @@ def create_event_poll(title, date, time):
             "time": time,
             "poll_message_id": poll_message.message_id,
             "poll_id": poll_message.poll.id,
-            "created_at": datetime.now().isoformat()
+            "created_at": datetime.now().isoformat(),
+            "notified": False
         }
         
         if save_event(event_data):
@@ -316,37 +317,50 @@ def get_events_list():
     return "\n".join(events_list)
 
 
+def update_event(event_id, update_dict):
+    """Обновляет данные события по event_id"""
+    events = load_all_events()
+    updated = False
+    for event in events:
+        if event['id'] == event_id:
+            event.update(update_dict)
+            updated = True
+            break
+    if updated:
+        with open(EVENTS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(events, f, ensure_ascii=False, indent=2)
+    return updated
+
+
 def schedule_event_notifications():
-    """Планирует уведомления для всех предстоящих событий"""
+    """Планирует уведомления для всех предстоящих событий, учитывая пропущенные и уже отправленные"""
     try:
         events = load_all_events()
-        today = datetime.now().date()
-        
-        for event in events:
+        now = datetime.now()
+        today = now.date()
+        for event in events[:]:  # копия списка, чтобы можно было удалять
             try:
                 event_date = datetime.strptime(event['date'], '%d.%m.%Y').date()
                 event_time = datetime.strptime(event['time'], '%H:%M').time()
                 event_datetime = datetime.combine(event_date, event_time)
-                
-                # Если событие сегодня и через 4 часа
+                notified = event.get('notified', False)
+
+                # Если событие уже прошло — удаляем
+                if event_datetime < now:
+                    delete_event(event['id'])
+                    continue
+
+                # Если событие сегодня и до него осталось меньше 4 часов, но уведомление не отправлено
                 if event_date == today:
-                    now = datetime.now()
                     time_until_event = event_datetime - now
-                    
-                    # Если до события 4 часа или меньше
-                    if timedelta(hours=3, minutes=55) <= time_until_event <= timedelta(hours=4, minutes=5):
+                    if time_until_event <= timedelta(hours=4) and not notified:
                         send_event_notification(event['id'])
-                        
-                        # Отправляем подтверждение и открепляем опрос
                         send_event_confirmation(event['id'])
                         unpin_event_poll(event['id'])
-                        
-                        # Удаляем событие после обработки
-                        delete_event(event['id'])
-                        
+                        update_event(event['id'], {'notified': True})
+                        # Не удаляем событие сразу — пусть останется до наступления времени
             except Exception as e:
                 logger.error(f"Ошибка при обработке события {event.get('title', 'Unknown')}: {e}")
-                
     except Exception as e:
         logger.error(f"Ошибка при планировании уведомлений событий: {e}")
 
