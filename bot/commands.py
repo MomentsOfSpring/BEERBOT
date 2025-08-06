@@ -5,7 +5,7 @@ from datetime import datetime
 
 from telebot import types
 from permissions import boss_only, admin_only
-from config import bot, BOSS, PHOTOS, RULES_FILE, HELP_FILE, INVITE, MAGIC_CHAT_ID, BARTENDER
+from config import bot, BOSS, PHOTOS, RULES_FILE, HELP_FILE, INVITE, MAGIC_CHAT_ID, BARTENDER, ADMIN
 from polls import create_poll, unpin_poll
 from utils import generate_report, clear_poll_results, clear_poll_id, load_yes_votes, set_friends, remove_friends
 from buttons import send_reservation_buttons
@@ -493,6 +493,28 @@ def handle_send_event_result_callback(call):
     save_event_data(event_id, {"participants": [], "friends": []})
     bot.answer_callback_query(call.id, "Результаты отправлены бармену и очищены!", show_alert=True)
     bot.send_message(call.message.chat.id, f"Результаты по '{event['title']}' отправлены бармену и очищены.")
+
+# Команда подсчета парней
+def skolkobudetnaroda(message):
+    try:
+        yes_voters = load_yes_votes()  # список словарей с id и именами
+        friends = load_friends()       # список словарей с id и count
+        n_yes = len(yes_voters)
+        n_friends = sum(f.get('count', 0) for f in friends)
+        total = n_yes + n_friends
+        
+        # Проверяем, есть ли активный опрос и участники
+        if total == 0:
+            bot.send_message(message.chat.id, "Рановато интересоваться, дружище..")
+            return
+            
+        bot.send_message(
+            message.chat.id,
+            f"Наши парни: {n_yes}\nПарни парней: {n_friends}\nВсего парней: {total}\n(Некоторые мб девчонки..)"
+        )
+    except Exception as e:
+        logger.error(f"Ошибка в /skolkobudetnaroda: {e}")
+        bot.send_message(ADMIN, "Произошла ошибка при подсчёте народу.")
 
 
 

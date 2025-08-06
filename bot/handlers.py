@@ -3,7 +3,7 @@ from commands import (
     invite_link, beer_rules, greet_new_members, help_command,
     info, manual_poll, manual_gameon, manual_poll_results, plus_friends, minus_friends,
     add_event_command, delete_event_command, events_command, plus_event_friends, minus_event_friends,
-    shout_command, send_event_results_command, handle_send_event_result_callback
+    shout_command, send_event_results_command, handle_send_event_result_callback, skolkobudetnaroda
 )
 from callbacks import callback_message, handle_poll_answer_callback
 from utils import save_yes_vote, load_poll
@@ -57,6 +57,9 @@ def register_handlers():
     
     # Обработчик команды /sendevent
     bot.message_handler(commands=['sendevent'])(send_event_results_command)
+
+    # Обработчик команды /skolkobudetnaroda
+    bot.message_handler(commands=['skolkobudetnaroda'])(skolkobudetnaroda)
 
 # === HANDLERS ===
     # Обработчик новых участников
