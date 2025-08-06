@@ -514,6 +514,7 @@ def skolkobudetnaroda(message):
         )
     except Exception as e:
         logger.error(f"Ошибка в /skolkobudetnaroda: {e}")
+        bot.send_message(message.chat.id, "Рановато интересоваться, дружище..")
         bot.send_message(ADMIN, "Произошла ошибка при подсчёте народу.")
 
 
