@@ -378,6 +378,7 @@ def manual_poll_results(message):
     try:
         bot.send_message(BOSS, "Голосование завершено вручную.")
         bot.send_message(BOSS, report)
+        bot.send_message(MAGIC_CHAT_ID, report)
         send_reservation_buttons(BOSS)
         bot.send_message(
             MAGIC_CHAT_ID,
