@@ -7,10 +7,10 @@ from telebot import types
 from permissions import boss_only, admin_only
 from config import bot, BOSS, PHOTOS, RULES_FILE, HELP_FILE, INVITE, MAGIC_CHAT_ID, BARTENDER, ADMIN
 from polls import create_poll, unpin_poll
-from utils import generate_report, clear_poll_results, clear_poll_id, load_yes_votes, set_friends, remove_friends
+from utils import generate_report, clear_poll_results, clear_poll_id, load_yes_votes, set_friends, remove_friends, load_friends, save_friends
 from buttons import send_reservation_buttons
 from state import user_states
-from events import create_event_poll, get_events_keyboard, get_confirmation_keyboard, delete_event, send_event_cancellation_notification, unpin_event_poll, get_events_list, get_events_keyboard_for_friends, add_event_friends, remove_event_friends, load_all_events, load_event_data
+from events import create_event_poll, get_events_keyboard, get_confirmation_keyboard, delete_event, send_event_cancellation_notification, unpin_event_poll, get_events_list, get_events_keyboard_for_friends, add_event_friends, remove_event_friends, load_all_events, load_event_data, get_event_by_id, save_event_data
 
 
 # Логирование
@@ -498,25 +498,23 @@ def handle_send_event_result_callback(call):
 # Команда подсчета парней
 def skolkobudetnaroda(message):
     try:
-        yes_voters = load_yes_votes()  # список словарей с id и именами
-        friends = load_friends()       # список словарей с id и count
-        n_yes = len(yes_voters)
-        n_friends = sum(f.get('count', 0) for f in friends)
-        total = n_yes + n_friends
+        report, tables = generate_report()
         
         # Проверяем, есть ли активный опрос и участники
-        if total == 0:
+        if report is None or tables == 0:
             bot.send_message(message.chat.id, "Рановато интересоваться, дружище..")
             return
-            
-        bot.send_message(
-            message.chat.id,
-            f"Наши парни: {n_yes}\nПарни парней: {n_friends}\nВсего парней: {total}\n(Некоторые мб девчонки..)"
-        )
+        
+        try:
+            bot.send_message(message.chat.id, report)    
+        except Exception as e:
+            logger.error(f"Ошибка в /skolkobudetnaroda: {e}")
+            bot.send_message(message.chat.id, "Рановато интересоваться, дружище..")
+            bot.send_message(ADMIN, "Произошла ошибка при подсчёте народу.")
     except Exception as e:
-        logger.error(f"Ошибка в /skolkobudetnaroda: {e}")
-        bot.send_message(message.chat.id, "Рановато интересоваться, дружище..")
-        bot.send_message(ADMIN, "Произошла ошибка при подсчёте народу.")
+            logger.error(f"Ошибка в /skolkobudetnaroda: {e}")
+            bot.send_message(message.chat.id, "Рановато интересоваться, дружище..")
+            bot.send_message(ADMIN, "Произошла ошибка при подсчёте народу.")
 
 
 
