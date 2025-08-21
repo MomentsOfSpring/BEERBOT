@@ -39,7 +39,7 @@ def was_task_already_run(task_name, after_dt):
 
 
 def clear_state():
-    """Safely deletes the state file."""
+    """Функция очистки состояния планировщика"""
     try:
         if os.path.exists(STATE_FILE):
             os.remove(STATE_FILE)

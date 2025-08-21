@@ -166,7 +166,7 @@ def callback_message(callback):
             user_states.pop(key, None)
             return
         
-        action_type = "добавления" if state["type"] == "plus" else "удаления"
+        action_type = "добавления" if state["type"] == "set" else "удаления"
         bot.edit_message_text(
             chat_id=chat_id,
             message_id=message_id,
@@ -183,10 +183,9 @@ def callback_message(callback):
                 bot.send_message(BARTENDER, "Привет, сегодня без брони. У магов — трезвая среда.")
             else:
                 bot.send_message(MAGIC_CHAT_ID, "Босс забронировал кабак!")
+                bot.send_message(MAGIC_CHAT_ID, report)
                 bot.send_message(BOSS, "Отлично, фиксируем столы.")
                 bot.send_message(BARTENDER, f"Привет, маги сегодня придут к 19:00, резервируем {tables} стола(-ов).")
-            clear_poll_results()
-            clear_poll_id()
         except Exception as e:
             print(f"Ошибка при отправке результата брони: {e}")
 

@@ -43,7 +43,7 @@ def signal_handler(sig, frame):
     sys.exit(0)
     
     
-# Значит жить можно.
+# Команда ЗАПУСКа.
 if __name__ == '__main__':
     # Регистрируем обработчики команд
     register_handlers()

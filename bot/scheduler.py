@@ -73,7 +73,9 @@ def wednesday_three_pm():
 def wednesday_six_pm():
     now = datetime.now(MSK).strftime('%Y-%m-%d %H:%M:%S')
     print(f"[{now}] Запуск пожелания хорошей игры")
-    bot.send_message(MAGIC_CHAT_ID, "Хорошей игры, господа маги!\nПусть победит хоть кто-нибудь, а напьется пива сильнейший!")
+    clear_poll_results()
+    clear_poll_id()
+    bot.send_message(MAGIC_CHAT_ID, "Хорошей игры, господа маги!\nОтшлёпайте друг друга карточками как следует!")
 
 
 def run_scheduler():

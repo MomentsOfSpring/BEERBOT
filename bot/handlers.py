@@ -1,8 +1,8 @@
 from config import bot
 from commands import (
     invite_link, beer_rules, greet_new_members, help_command,
-    info, manual_poll, manual_gameon, manual_poll_results, plus_friends, minus_friends,
-    add_event_command, delete_event_command, events_command, plus_event_friends, minus_event_friends,
+    info, manual_poll, manual_gameon, manual_poll_results, set_friends, minus_friends,
+    add_event_command, delete_event_command, events_command, set_event_friends, minus_event_friends,
     shout_command, send_event_results_command, handle_send_event_result_callback, skolkobudetnaroda
 )
 from callbacks import callback_message, handle_poll_answer_callback
@@ -32,8 +32,8 @@ def register_handlers():
     # Обработчик команды /pollres
     bot.message_handler(commands=['pollres'])(manual_poll_results)
 
-    # Обработчик команды /plusfriends
-    bot.message_handler(commands=['plusfriends'])(plus_friends)
+    # Обработчик команды /setfriends
+    bot.message_handler(commands=['setfriends'])(set_friends)
     # Обработчик команды /minusfriends
     bot.message_handler(commands=['minusfriends'])(minus_friends)
     
@@ -46,8 +46,8 @@ def register_handlers():
     # Обработчик команды /events
     bot.message_handler(commands=['events'])(events_command)
     
-    # Обработчик команды /pluseventfriends
-    bot.message_handler(commands=['pluseventfriends'])(plus_event_friends)
+    # Обработчик команды /seteventfriends
+    bot.message_handler(commands=['seteventfriends'])(set_event_friends)
     
     # Обработчик команды /minuseventfriends
     bot.message_handler(commands=['minuseventfriends'])(minus_event_friends)
