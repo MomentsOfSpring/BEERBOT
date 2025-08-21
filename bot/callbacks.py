@@ -45,21 +45,40 @@ def callback_message(callback):
                         can_add_web_page_previews=True
                     )
                 )
-                bot.edit_message_text("Добро пожаловать домой!", chat_id, message_id)
+                bot.edit_message_text("Добро пожаловать домой, Друг! 🎉", chat_id, message_id)
 
                 full_name = f"{callback.from_user.first_name or ''} {callback.from_user.last_name or ''}".strip()
                 markup = types.InlineKeyboardMarkup()
                 markup.add(types.InlineKeyboardButton('📜 Правила группы', callback_data='RULES'))
 
                 welcome_text = (
-                    f"Добро пожаловать, {full_name}! 🎉\n\n"
+                    f"Добро пожаловать, {full_name}!\n\n"
                     f"Ознакомься с правилами группы, чтобы не получить по щам!"
                 )
                 bot.send_message(chat_id, welcome_text, reply_markup=markup)
 
             elif parts[1] == "no":
-                bot.edit_message_text("У нас таких не любят..", chat_id, message_id)
-                bot.kick_chat_member(chat_id, user_id)
+                bot.restrict_chat_member(
+                    chat_id,
+                    user_id,
+                    permissions=types.ChatPermissions(
+                        can_send_messages=True,
+                        can_send_media_messages=True,
+                        can_send_other_messages=True,
+                        can_add_web_page_previews=True
+                    )
+                )
+                bot.edit_message_text("Добро пожаловать, конечно, но сразу скажу, у нас таких не любят..", chat_id, message_id)
+
+                full_name = f"{callback.from_user.first_name or ''} {callback.from_user.last_name or ''}".strip()
+                markup = types.InlineKeyboardMarkup()
+                markup.add(types.InlineKeyboardButton('📜 Правила группы', callback_data='RULES'))
+
+                welcome_text = (
+                    f"Добро пожаловать, {full_name}!\n\n"
+                    f"Ознакомься с правилами группы, чтобы не получить по щам!"
+                )
+                bot.send_message(chat_id, welcome_text, reply_markup=markup)
 
         return
 
