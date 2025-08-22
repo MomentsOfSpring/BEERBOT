@@ -148,13 +148,13 @@ def info(message):
         bot.reply_to(message, choice(phrases))
         
     # Format memes:
-    elif ("стандарт" in message.text.lower()
+    elif (" стандарт " in message.text.lower()
           or "standard" in message.text.lower()):
         bot.reply_to(message, f"Стандарт мёртв, чуваки. 🤡")
     elif ("пионер" in message.text.lower()
           or "pioner" in message.text.lower()):
         bot.reply_to(message, "Уууу, пацаны, да у нас тут пионерщик..\nДырявим его!")
-    elif ("моддерн" in message.text.lower()
+    elif ("модерн" in message.text.lower()
           or "modern" in message.text.lower()):
         bot.reply_to(message, "Модерн для геев!")
     elif ("легаси" in message.text.lower()
