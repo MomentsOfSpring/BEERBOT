@@ -141,6 +141,8 @@ def info(message):
           or "цeдx" in message.text.lower()
           or "цдх" in message.text.lower()
           or "компот" in message.text.lower()
+          or "кедх" in message.text.lower()
+          or "кдх" in message.text.lower()
           or "компетитив" in message.text.lower())):
         phrases = ["Ни слова про CEDH в этом чате!", "Внимание! Обнаружена угроза CEDH!\nПарни, готовьте свои COUNETERSPELLS..", "Отставить cEDH!", "CringeDH..", "Агаааа, попался! Цедхшник.."]
         bot.reply_to(message, choice(phrases))
@@ -171,11 +173,29 @@ def info(message):
     elif ("edh" in message.text.lower()
           or "едх" in message.text.lower()):
         bot.reply_to(message, "Блинб, ЕДХ.... 🤤")
+    elif ("эрмитаж" in message.text.lower()
+          or "heritage" in message.text.lower()
+          or "легаси куб" in message.text.lower()):
+        bot.reply_to(message, "Опять выдуманный формат..\nПарни, звоните в дурку.")
+    elif ("дуэльник" in message.text.lower()
+          or "дуэльный" in message.text.lower()):
+        bot.reply_to(message, f"Дуэльная магия - это втихаря тапать друг друга 🤡")
     
     # Glory to Beer
     elif ("пиво" in message.text.lower()
-          or "beer" in message.text.lower()):
+          or "beer" in message.text.lower()
+          or "пива" in message.text.lower()):
         bot.reply_to(message, "Пиво в стеке! Ответы?")
+        
+    # Only LoveCraft
+    elif ("игроменталь" in message.text.lower()
+          or "под" in message.text.lower()
+          or "хоббигеймс" in message.text.lower()
+          or "единорог" in message.text.lower()
+          or "хг" in message.text.lower()
+          or "роге" in message.text.lower()
+          or "рога" in message.text.lower()):
+        bot.reply_to(message, "ВНИМАНИЕ!\nВражеская реклама гейклуба!\nВсем приготовить свою гетеросексуальность!")
 
     # Стас Special
     elif "стас" in message.text.lower():
@@ -192,6 +212,10 @@ def info(message):
     elif ("юрико" in message.text.lower()
           or "yuriko" in message.text.lower()):
         bot.reply_to(message, "Юрико? Триггер!\nВ ебало всем на 15!")
+    elif "легосеки" in message.text.lower():
+        bot.reply_to(message, f"Легосеки - Гомосеки")
+    elif "легосек" in message.text.lower():
+        bot.reply_to(message, f"Легосек - Гомосек")
         
     # Friends
     key = (message.from_user.id, message.chat.id)
