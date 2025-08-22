@@ -189,12 +189,12 @@ def info(message):
         
     # Only LoveCraft
     elif ("игроменталь" in message.text.lower()
-          or "под" in message.text.lower()
+          or " под " in message.text.lower()
           or "хоббигеймс" in message.text.lower()
           or "единорог" in message.text.lower()
-          or "хг" in message.text.lower()
-          or "роге" in message.text.lower()
-          or "рога" in message.text.lower()):
+          or " хг " in message.text.lower()
+          or " роге " in message.text.lower()
+          or " рога " in message.text.lower()):
         bot.reply_to(message, "ВНИМАНИЕ!\nВражеская реклама гейклуба!\nВсем приготовить свою гетеросексуальность!")
 
     # Стас Special
