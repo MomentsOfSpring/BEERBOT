@@ -144,19 +144,54 @@ def info(message):
           or "компетитив" in message.text.lower())):
         phrases = ["Ни слова про CEDH в этом чате!", "Внимание! Обнаружена угроза CEDH!\nПарни, готовьте свои COUNETERSPELLS..", "Отставить cEDH!", "CringeDH..", "Агаааа, попался! Цедхшник.."]
         bot.reply_to(message, choice(phrases))
-
-    # Glory to Bot
-    elif (("бот крутой" in message.text.lower()
-          or "крутой бот" in message.text.lower()
-          or "классный бот" in message.text.lower()
-          or "бот классный" in message.text.lower())
-          or "хороший бот" in message.text.lower()
-          or "бот хороший" in message.text.lower()):
-        bot.reply_to(message, "Спасибо, бро! Обнял, поцеловал (не по-гейски)!")
+        
+    # Format memes:
+    elif ("стандарт" in message.text.lower()
+          or "standard" in message.text.lower()):
+        bot.reply_to(message, f"Стандарт мёртв, чуваки. 🤡")
+    elif ("пионер" in message.text.lower()
+          or "pioner" in message.text.lower()):
+        bot.reply_to(message, "Уууу, пацаны, да у нас тут пионерщик..\nДырявим его!")
+    elif ("моддерн" in message.text.lower()
+          or "modern" in message.text.lower()):
+        bot.reply_to(message, "Модерн для геев!")
+    elif ("легаси" in message.text.lower()
+          or "легоси" in message.text.lower()
+          or "legacy" in message.text.lower()):
+        bot.reply_to(message, "Хуегаси")
+    elif ("паупер" in message.text.lower()
+          or "пупер" in message.text.lower()
+          or "pauper" in message.text.lower()):
+        bot.reply_to(message, "паупер для бомжей бтв 🤡")
+    elif ("винтаж" in message.text.lower()
+          or "vintage" in message.text.lower()):
+        bot.reply_to(message, "Какой тебе ещё винтаж? По йогурту и спать.")
+    elif "elder dragon highlander" in message.text.lower():
+        bot.reply_to(message, f"Эвона как ты завернул")
+    elif ("edh" in message.text.lower()
+          or "едх" in message.text.lower()):
+        bot.reply_to(message, "Блинб, ЕДХ.... 🤤")
+    
+    # Glory to Beer
+    elif ("пиво" in message.text.lower()
+          or "beer" in message.text.lower()):
+        bot.reply_to(message, "Пиво в стеке! Ответы?")
 
     # Стас Special
     elif "стас" in message.text.lower():
         bot.reply_to(message, f"Блинб, Стас.... 🤤 ")
+    
+    # Random memes
+    elif "бот" in message.text.lower():
+        bot.reply_to(message, f"Чё тебе надо?")
+    elif "контра" in message.text.lower():
+        bot.reply_to(message, f"Контра? В стек консиднул.")
+    elif ("ристик" in message.text.lower()
+          or "ремора" in message.text.lower()):
+        bot.reply_to(message, "Доплачивать будешь?")
+    elif ("юрико" in message.text.lower()
+          or "yuriko" in message.text.lower()):
+        bot.reply_to(message, "Юрико? Триггер!\nВ ебало всем на 15!")
         
     # Friends
     key = (message.from_user.id, message.chat.id)
