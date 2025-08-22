@@ -188,7 +188,7 @@ def info(message):
         bot.reply_to(message, "Пиво в стеке! Ответы?")
         
     # Only LoveCraft
-    elif ("игроменталь" in message.text.lower()
+    elif ("игроментал" in message.text.lower()
           or " под " in message.text.lower()
           or "хоббигеймс" in message.text.lower()
           or "единорог" in message.text.lower()
