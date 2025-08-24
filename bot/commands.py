@@ -189,7 +189,6 @@ def info(message):
         
     # Only LoveCraft
     elif ("игроментал" in message.text.lower()
-          or " под " in message.text.lower()
           or "хоббигеймс" in message.text.lower()
           or "единорог" in message.text.lower()
           or " хг " in message.text.lower()
@@ -202,7 +201,7 @@ def info(message):
         bot.reply_to(message, f"Блинб, Стас.... 🤤 ")
     
     # Random memes
-    elif "бот" in message.text.lower():
+    elif " бот " in message.text.lower():
         bot.reply_to(message, f"Чё тебе надо?")
     elif "контра" in message.text.lower():
         bot.reply_to(message, f"Контра? В стек консиднул.")
