@@ -154,6 +154,9 @@ def info(message):
     elif ("пионер" in message.text.lower()
           or "pioner" in message.text.lower()):
         bot.reply_to(message, "Уууу, пацаны, да у нас тут пионерщик..\nДырявим его!")
+    elif ("премодерн" in message.text.lower()
+          or "premodern" in message.text.lower()):
+        bot.reply_to(message, "Отличный выдуманный формат, чтобы поиграть со своим парнем!")
     elif ("модерн" in message.text.lower()
           or "modern" in message.text.lower()):
         bot.reply_to(message, "Модерн для геев!")
@@ -177,6 +180,19 @@ def info(message):
           or "heritage" in message.text.lower()
           or "легаси куб" in message.text.lower()):
         bot.reply_to(message, "Опять выдуманный формат..\nПарни, звоните в дурку.")
+    elif (" арена " in message.text.lower()
+          or " арене " in message.text.lower()
+          or " аренка " in message.text.lower()
+          or " арену " in message.text.lower()
+          or " аренке " in message.text.lower()
+          or " аренку " in message.text.lower()):
+        bot.reply_to(message, "ПАРНИ, АНЕКДОТ!\nПриходит игрок в арену домой и говорит своему парню 'Схлестнемся на мечах, Гладиатор?' 🤡")
+    elif (" rudc " in message.text.lower()
+          or " рудк " in message.text.lower()
+          or " рудц " in message.text.lower()
+          or " duel commander " in message.text.lower()
+          or " рудх " in message.text.lower()):
+        bot.reply_to(message, "Дуэльный едх это типа 'Приходи сегодня ко мне, давай потапаем друг друга' 🤡")
     elif ("дуэльник" in message.text.lower()
           or "дуэльный" in message.text.lower()):
         bot.reply_to(message, f"Дуэльная магия - это втихаря тапать друг друга 🤡")
