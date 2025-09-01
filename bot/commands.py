@@ -178,6 +178,8 @@ def info(message):
         bot.reply_to(message, "Блинб, ЕДХ.... 🤤")
     elif ("эрмитаж" in message.text.lower()
           or "heritage" in message.text.lower()
+          or "центурион" in message.text.lower()
+          or "centurion" in message.text.lower()
           or "легаси куб" in message.text.lower()):
         bot.reply_to(message, "Опять выдуманный формат..\nПарни, звоните в дурку.")
     elif (" арена " in message.text.lower()
@@ -192,15 +194,14 @@ def info(message):
           or "рудц" in message.text.lower()
           or "duel commander" in message.text.lower()
           or "рудх" in message.text.lower()):
-        bot.reply_to(message, "Дуэльный едх это типа 'Приходи сегодня ко мне, давай потапаем друг друга' 🤡")
+        bot.reply_to(message, "Отличный выдуманный формат, чтобы поиграть со своим парнем!")
     elif ("дуэльник" in message.text.lower()
           or "дуэльный" in message.text.lower()):
         bot.reply_to(message, f"Дуэльная магия - это втихаря тапать друг друга 🤡")
     
     # Glory to Beer
-    elif ("пиво" in message.text.lower()
-          or "beer" in message.text.lower()
-          or "пива" in message.text.lower()):
+    elif (" пиво " in message.text.lower()
+          or " пива " in message.text.lower()):
         bot.reply_to(message, "Пиво в стеке! Ответы?")
         
     # Only LoveCraft
