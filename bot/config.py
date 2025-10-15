@@ -1,26 +1,29 @@
-import os
 import logging
-from telebot import TeleBot
+import os
+
 from dotenv import load_dotenv
+from telebot import TeleBot
 
 # Загружаем переменные из .env
 load_dotenv()
 
 logger = logging.getLogger(__name__)
 
+
 def get_project_root():
     """Возвращает абсолютный путь к корню проекта."""
     current_file = os.path.abspath(__file__)
     return os.path.dirname(os.path.dirname(current_file))
 
+
 PROJECT_ROOT = get_project_root()
 
 # FILES:
-RULES_FILE = os.path.join(PROJECT_ROOT, 'text', 'rules.txt')
-HELP_FILE = os.path.join(PROJECT_ROOT, 'text', 'help.txt')
+RULES_FILE = os.path.join(PROJECT_ROOT, "text", "rules.txt")
+HELP_FILE = os.path.join(PROJECT_ROOT, "text", "help.txt")
 PHOTOS = [
-    os.path.join(PROJECT_ROOT, 'img', 'brackets.jpeg'),
-    os.path.join(PROJECT_ROOT, 'img', 'changers.jpeg')
+    os.path.join(PROJECT_ROOT, "img", "brackets.jpeg"),
+    os.path.join(PROJECT_ROOT, "img", "changers.jpeg"),
 ]
 
 # Проверяем существование файлов при импорте
@@ -55,7 +58,8 @@ ADMIN = int(os.getenv("ADMIN"))
 BOSS = int(os.getenv("BOSS"))
 STAS = int(os.getenv("STAS"))
 SIMON = int(os.getenv("SIMON"))
-BOSSES = [ADMIN, BOSS, STAS, SIMON]
+DRAFT = int(os.getend("DRAFT"))
+BOSSES = [ADMIN, BOSS, STAS, SIMON, DRAFT]
 
 BARTENDER = int(os.getenv("BARTENDER"))
 
@@ -65,4 +69,5 @@ bot = TeleBot(TOKEN)
 # DATA:
 POLL_DATA_FILE = "poll_id.json"
 POLL_RESULTS = "votes.json"
-FRIENDS_FILE = 'friends.json' 
+FRIENDS_FILE = "friends.json"
+

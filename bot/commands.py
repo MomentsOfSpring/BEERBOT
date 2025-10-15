@@ -192,6 +192,8 @@ def info(message):
     elif ("rudc" in message.text.lower()
           or "рудк" in message.text.lower()
           or "рудц" in message.text.lower()
+          or "tiny leaders" in message.text.lower()
+          or "тини лидерс" in message.text.lower()
           or "duel commander" in message.text.lower()
           or "рудх" in message.text.lower()):
         bot.reply_to(message, "Отличный выдуманный формат, чтобы поиграть со своим парнем!")
